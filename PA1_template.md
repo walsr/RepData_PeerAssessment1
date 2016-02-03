@@ -1,21 +1,16 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-    setwd("/Users/tgdwaana/sync/git/RepData_PeerAssessment1_github")
+setwd("/Users/tgdwaana/sync/git/RepData_PeerAssessment1_github")
 
-    fileName <- "activity.zip"
-    fileNameCSV <- gsub("zip", "csv", fileName)
+fileName <- "activity.zip"
+fileNameCSV <- gsub("zip", "csv", fileName)
 
-    unzip(fileName, fileNameCSV)
-    data <- read.csv(fileNameCSV, header=TRUE, sep=",", na.strings="NA")
-    data$date <- as.Date(da)
-    summary(data)
+unzip(fileName, fileNameCSV)
+data <- read.csv(fileNameCSV, header=TRUE, sep=",", na.strings="NA")
+data$date <- as.Date(da)
+summary(data)
 
 ## What is mean total number of steps taken per day?
 
