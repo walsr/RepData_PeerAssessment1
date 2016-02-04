@@ -9,7 +9,7 @@ keep_md: true
 ## Loading and preprocessing the data
 
 ```{r}
-setwd("/Users/tgdwaana/sync/git/RepData_PeerAssessment1_github")
+setwd("/Users/awalser/sync/git/RepData_PeerAssessment1")
 
 fileName <- "activity.zip"
 fileNameCSV <- gsub("zip", "csv", fileName)
@@ -27,13 +27,13 @@ summary(data)
 
 Get the total number of steps take per day
 ```{r}
-totalSteps <- tapply(data$steps, data$date, FUN=sum)
+totalSteps <- tapply(data$steps, data$date, FUN=sum, na.rm =TRUE)
 ```
 Plot histogram of the total number of steps taken each day    
 ```{r}
 hist(totalSteps, xlab="total steps per day", ylab="frequency", main="histogram of total steps per day")
 ```
-Calculate the mean of the median of the total number of steps taken per day
+Calculate the mean and median of the total number of steps taken per day
 ```{r}
 mean(totalSteps, na.rm=TRUE)
 median(totalSteps, na.rm=TRUE)
@@ -55,7 +55,6 @@ plot(meanSteps, type="l",
 ```{r}
 positionOfMax <- which.max(meanSteps)
 names(positionOfMax)
-unname(positionOfMax)*5
 ```
 
 ## Imputing missing values
@@ -67,16 +66,54 @@ Note that there are a number of days/intervals where there are missing values (c
 sum(is.na(data$steps))
 ```
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+As a strategy for filling in all of the missing values in the dataset we use the mean for that 5-minute interval.
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r}
 
+for(i in 1:length(data$steps)){
+  if(is.na(data[i,1])){
+    data[i,1] <- unname(meanSteps[toString(data[i,3])])
+  }
+}
+
 ```
-3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
+```{r}
+totalSteps <- tapply(data$steps, data$date, FUN=sum, na.rm =TRUE)
+hist(totalSteps, xlab="total steps per day", ylab="frequency", main="histogram of total steps per day")
+mean(totalSteps, na.rm=TRUE)
+median(totalSteps, na.rm=TRUE)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
 
 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+```{r}
+for(i in 1:length(data[,1])){
+  name = weekdays(as.Date(data$date[i]))
+  if (name == "Saturday" | name == "Sunday"){
+    data$category[i] <- "weekend"
+  } else {
+    data$category[i] <- "weekday"
+  }
+}
+data$category <- as.factor(data$category)
+```
+
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+```{r}
+library(ggplot2)
+library(plyr)
+tmpdata <- ddply(data, .(interval,category), summarize, steps = mean(steps, na.rm=TRUE))
+ggplot(data=tmpdata, aes(x=interval, y=steps, group=category)) + geom_line()+ facet_wrap(~ category, nrow=2)
+```
+
+In the moring hours until around 8am there is more activity on the weekdays, whereas in the afternoon there is more activity on the weekend. 
